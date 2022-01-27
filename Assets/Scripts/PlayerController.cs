@@ -4,6 +4,6 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public bool isFiring, isReloading, isJumping, isRunning;
+    public bool isFiring, isReloading, isJumping, isRunning, isAiming;
 
 }
