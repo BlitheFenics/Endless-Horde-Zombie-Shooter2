@@ -32,6 +32,7 @@ public class MovementComponent : MonoBehaviour
     public readonly int isRunningHash = Animator.StringToHash("isRunning");
     public readonly int isFiringHash = Animator.StringToHash("isFiring");
     public readonly int isReloadingHash = Animator.StringToHash("isReloading");
+    public readonly int verticalAimHash = Animator.StringToHash("VerticalAim");
 
     private void Awake()
     {
@@ -43,7 +44,10 @@ public class MovementComponent : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        if(!GameManager.instance.cursorActive)
+        {
+            AppEvents.InvokeMouseCursorEnable(false);
+        }
     }
 
     // Update is called once per frame
@@ -56,6 +60,19 @@ public class MovementComponent : MonoBehaviour
         angles.z = 0;
 
         var angle = followTransform.transform.localEulerAngles.x;
+
+        float min = -60f;
+        float max = 70.0f;
+        float range = max - min;
+        float offsetToZero = 0 - min;
+        float aimAngle = followTransform.transform.localEulerAngles.x;
+
+        aimAngle = (aimAngle > 180) ? aimAngle - 360 : aimAngle;
+
+        float val = (aimAngle + offsetToZero) / (range);
+
+        print(val);
+        playerAnimator.SetFloat(verticalAimHash, val);
 
         if(angle > 180 && angle < 300)
         {
@@ -81,6 +98,20 @@ public class MovementComponent : MonoBehaviour
 
         transform.position += movementDirection;
     }
+    /*float groundedAngle = 45;
+    private void FixedUpdate()
+    {
+        RaycastHit hit;
+        //Debug.DrawRay(new Vector3(transform.position.x, GetComponent<Collider>().bounds.extents.y, transform.position.z), -Vector3.up, Color.red, Time.deltaTime, true);
+        if (Physics.Raycast(new Vector3(transform.position.x, GetComponent<Collider>().bounds.extents.y, transform.position.z), -Vector3.up, out hit, 0.001f, LayerMask.GetMask("Ground")))
+        {
+            if (Vector3.Angle(hit.normal, Vector3.up) < groundedAngle)
+            {
+                playerController.isJumping = false;
+                playerAnimator.SetBool(isJumpingHash, false);
+            }
+        }
+    }*/
 
     public void OnMovement(InputValue value)
     {
@@ -97,6 +128,11 @@ public class MovementComponent : MonoBehaviour
 
     public void OnJump(InputValue value)
     {
+        if(playerController.isJumping)
+        {
+            return;
+        }
+
         playerController.isJumping = value.isPressed;
         rigidbody.AddForce((transform.up + moveDirection) * jumpForce, ForceMode.Impulse);
         playerAnimator.SetBool(isJumpingHash, playerController.isJumping);
@@ -113,11 +149,37 @@ public class MovementComponent : MonoBehaviour
         // if we aim up down adjust animations to have a mask that will let us properly animate aim
     }
 
+    bool IsGroundCollision(ContactPoint[] contacts)
+    {
+        for(int i = 0; i < contacts.Length; i++)
+        {
+            if(1 - contacts[i].normal.y < 1f)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         if (!collision.gameObject.CompareTag("Ground") && !playerController.isJumping) return;
 
-        playerController.isJumping = false;
-        playerAnimator.SetBool(isJumpingHash, false);
+        if (IsGroundCollision(collision.contacts))
+        {
+            playerController.isJumping = false;
+            playerAnimator.SetBool(isJumpingHash, false);
+        }
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        if (!collision.gameObject.CompareTag("Ground") && !playerController.isJumping || rigidbody.velocity.y > 0) return;
+
+        if (IsGroundCollision(collision.contacts))
+        {
+            playerController.isJumping = false;
+            playerAnimator.SetBool(isJumpingHash, false);
+        }
     }
 }
