@@ -80,7 +80,7 @@ public class WeaponComponent : MonoBehaviour
     protected virtual void FireWeapon()
     {
         weaponStats.bulletsInClip--;
-        Debug.Log(weaponStats.bulletsInClip);
+        //Debug.Log(weaponStats.bulletsInClip);
     }
 
     public virtual void StartReloading()

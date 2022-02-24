@@ -217,7 +217,7 @@ MonoBehaviour:
     repeating: 1
     weaponHitLayers:
       serializedVersion: 2
-      m_Bits: 4294967295
+      m_Bits: 126
     totalBullets: 500
   firingEffect: {fileID: 7157785889158266619}
   isFiring: 0

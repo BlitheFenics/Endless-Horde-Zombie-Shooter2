@@ -71,7 +71,7 @@ public class MovementComponent : MonoBehaviour
 
         float val = (aimAngle + offsetToZero) / (range);
 
-        print(val);
+        //print(val);
         playerAnimator.SetFloat(verticalAimHash, val);
 
         if(angle > 180 && angle < 300)

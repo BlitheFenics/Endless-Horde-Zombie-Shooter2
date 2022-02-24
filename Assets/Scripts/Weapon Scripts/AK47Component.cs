@@ -22,6 +22,18 @@ public class AK47Component : WeaponComponent
                 hitLocation = hit.point;
                 Vector3 hitDirection = hit.point - mainCamera.transform.position;
                 Debug.DrawRay(mainCamera.transform.position, hitDirection.normalized * weaponStats.fireDistance, Color.red, 1);
+
+                if(hit.collider.gameObject.TryGetComponent<Rigidbody>(out Rigidbody rigidbody))
+                {
+                    //Debug.Log("Hit Pillar");
+                    rigidbody.AddExplosionForce(1000f, gameObject.transform.position, 5f);
+                }
+
+                if (hit.collider.gameObject.TryGetComponent<Damageable>(out Damageable damageable))
+                {
+                    //Debug.Log("Damage");
+                    damageable.Damage(1, hit.point);
+                }
             }
         }
         else if(weaponStats.bulletsInClip <= 0)
